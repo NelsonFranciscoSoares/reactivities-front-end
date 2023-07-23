@@ -1,27 +1,18 @@
 import { Button, Item, Label, Segment } from "semantic-ui-react";
-import { Activity } from "../../../app/models/activity";
 import { SyntheticEvent, useState } from "react";
+import { useStore } from "../../../app/stores/store";
+import { observer } from "mobx-react-lite";
 
-interface Props {
-    activities: Activity[];
-    selectActivityHandler: (id: string) => void;
-    deleteActivityHandler: (id: string) => void;
-    submitting: boolean;
-}
-
-export default function ActivityList(
-{
-    activities,
-    selectActivityHandler,
-    deleteActivityHandler,
-    submitting
-}: Props){
+export default observer(function ActivityList(){ // classe marcada como observer
     const [target, setTarget] = useState('');
 
     function handleDeleteActivity(e: SyntheticEvent<HTMLButtonElement>, id: string) {
         setTarget(e.currentTarget.name);
         deleteActivityHandler(id);
     }
+
+    const { activityStore } = useStore();
+    const { deleteActivityHandler, loading, activitiesByDate: activities } = activityStore;
 
     return (
         <Segment>
@@ -36,10 +27,10 @@ export default function ActivityList(
                                 <div>{activity.city}, {activity.venue}</div>
                             </Item.Description>
                             <Item.Extra>
-                                <Button onClick={() => selectActivityHandler(activity.id)} floated='right' content='View' color='blue'/>
+                                <Button onClick={() => activityStore.selectActivityHandler(activity.id)} floated='right' content='View' color='blue'/>
                                 <Button 
                                     name={activity.id}
-                                    loading={submitting && activity.id === target} 
+                                    loading={loading && activity.id === target} 
                                     onClick={(event) => handleDeleteActivity(event, activity.id)} 
                                     floated='right' 
                                     content='Delete' 
@@ -52,4 +43,4 @@ export default function ActivityList(
             </Item.Group>
         </Segment>
     );
-}
+})
